@@ -10,6 +10,10 @@ repository = "https://github.com/vallentin/jsonc-to-json"
 license = "MIT"
 readme = "README.md"
 
+[[bin]]
+name = "jsonc-to-json"
+path = "./src/main.rs"
+
 [dependencies]
 any-lexer = "0.0.2"
 
