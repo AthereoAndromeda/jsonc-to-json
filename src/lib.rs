@@ -327,9 +327,10 @@ where
                     };
 
                     match tok {
-                        JsonCToken::Punct if s == "," => continue,
-                        JsonCToken::Delim => continue,
-                        JsonCToken::String
+                        JsonCToken::Punct if s == "," => continue, // Handles double
+                        JsonCToken::Delim if s == "]" || s == "}" => continue, // Handles trailing commas
+                        JsonCToken::Delim
+                        | JsonCToken::String
                         | JsonCToken::Number
                         | JsonCToken::Null
                         | JsonCToken::True
@@ -430,5 +431,44 @@ mod tests {
         assert_eq!(iter.next(), Some("[1,2,3"));
         assert_eq!(iter.next(), Some("]\"bar\""));
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_array_of_similar_obj() {
+        let jsonc = r#"
+// Line comment
+{
+"mystructs": [
+{
+"field1": "value1",
+/* Block Comment */
+"field2": 42
+},
+{
+"field1": "value2",
+"field2": 24
+}
+]
+}
+        "#;
+
+        let json = r#"
+
+{
+"mystructs": [
+{
+"field1": "value1",
+
+"field2": 42
+},
+{
+"field1": "value2",
+"field2": 24
+}
+]
+}
+        "#;
+
+        assert_jsonc_to_json!(jsonc, Cow::Owned(json.into()));
     }
 }
